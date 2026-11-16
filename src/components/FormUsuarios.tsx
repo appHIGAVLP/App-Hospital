@@ -6,6 +6,7 @@ interface FormularioUsuarioProps {
   onVolver: () => void;
   modoEdicion?: boolean; 
   datosIniciales?: any; 
+  usuarioActualId?: string | number;
 }
 
 interface EspecialidadDb {
@@ -13,7 +14,12 @@ interface EspecialidadDb {
   nombre: string;
 }
 
-export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, modoEdicion, datosIniciales }) => {
+export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
+  onVolver,
+  modoEdicion,
+  datosIniciales,
+  usuarioActualId
+}) => {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [username, setUsername] = useState('');
@@ -27,6 +33,10 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, 
 
   const [busquedaEsp, setBusquedaEsp] = useState('');
   const [mostrarLista, setMostrarLista] = useState(false);
+  const esUsuarioActual = modoEdicion &&
+    datosIniciales?.id !== undefined &&
+    usuarioActualId !== undefined &&
+    String(datosIniciales.id) === String(usuarioActualId);
 
   useEffect(() => {
     const cargarEspecialidades = async () => {
@@ -102,7 +112,7 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, 
       username,
       nombre,
       apellido,
-      is_admin: isAdmin,
+      is_admin: esUsuarioActual ? Boolean(datosIniciales?.is_admin) : isAdmin,
       especialidades: idsEspecialidades
     };
 
@@ -137,6 +147,11 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, 
   };
 
   const handleEliminarUsuario = async () => {
+    if (esUsuarioActual) {
+      mostrarToast("No puedes eliminar tu propio usuario.", "error");
+      return;
+    }
+
     mostrarConfirmacion(
       '',
       `¿Estás seguro de que deseas eliminar al usuario @${username}? Esta acción no se puede deshacer.`,
@@ -229,8 +244,16 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, 
             className="checkbox-input"
             checked={isAdmin} 
             onChange={e => setIsAdmin(e.target.checked)} 
+            disabled={esUsuarioActual}
+            title={esUsuarioActual ? 'No puedes modificar tu propio permiso de administrador' : undefined}
           />
-          <label htmlFor="adminCheck" className="checkbox-label">Administrador</label>
+          <label
+            htmlFor="adminCheck"
+            className="checkbox-label"
+            title={esUsuarioActual ? 'No puedes modificar tu propio permiso de administrador' : undefined}
+          >
+            Administrador
+          </label>
         </div>
 
         <div className="input-group multi-select-group" style={{ position: 'relative' }}>
@@ -283,7 +306,7 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({ onVolver, 
             {modoEdicion ? 'Guardar Cambios' : 'Guardar Usuario'}
           </button>
 
-          {modoEdicion && (
+          {modoEdicion && !esUsuarioActual && (
             <button 
               className="btn-eliminar"
               type="button"

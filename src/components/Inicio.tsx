@@ -242,7 +242,7 @@ export const Inicio: React.FC<InicioProps> = ({ onNavigateToProtocols }) => {
               </>
             )}
 
-            {vistaActual === 'crear' && Boolean(usuarioLogueado?.is_admin) && (
+            {vistaActual === 'crear' && usuarioLogueado?.is_admin && (
               tipoFormulario === 'usuario' ? (
               <GestionUsuarios 
                 onVolver={() => setVistaActual('inicio')}
@@ -262,6 +262,7 @@ export const Inicio: React.FC<InicioProps> = ({ onNavigateToProtocols }) => {
                 onVolver={() => setTipoFormulario('usuario')} 
                 modoEdicion={modoEdicion}
                 datosIniciales={datosEdicion}
+                usuarioActualId={usuarioLogueado.id}
               />
               ) : tipoFormulario === 'especialidad' ? (
                 <GestionEspecialidades 
