@@ -14,11 +14,12 @@ interface EspecialidadDb {
 }
 
 interface GestionEspecialidadesProps {
-  onVolver: () => void; 
+  onVolver: () => void;
   onEditarDiagnostico: (diagnostico: DiagnosticoAsociado) => void;
+  usuarioLogueadoId: string | number;
 }
 
-export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ onVolver, onEditarDiagnostico }) => {
+export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ onVolver, onEditarDiagnostico, usuarioLogueadoId }) => {
   const [vistaLocal, setVistaLocal] = useState<'lista' | 'formulario'>('lista');
   const [busqueda, setBusqueda] = useState('');
   const [nombre, setNombre] = useState('');
@@ -34,7 +35,7 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
         fetch(`${API_URL}/especialidades`),
         fetch(`${API_URL}/diagnosticos`)
       ]);
-      
+
       let especialidades: EspecialidadDb[] = [];
       let diagnosticosTotales: any[] = [];
 
@@ -42,9 +43,9 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
       if (resDiag.ok) diagnosticosTotales = await resDiag.json();
 
       const especialidadesCompletas = especialidades.map(esp => {
-        if (esp.diagnosticos) return esp; 
-        
-        const vinculados = diagnosticosTotales.filter(diag => 
+        if (esp.diagnosticos) return esp;
+
+        const vinculados = diagnosticosTotales.filter(diag =>
           diag.especialidades?.some((e: any) => e.id === esp.id)
         );
         return { ...esp, diagnosticos: vinculados };
@@ -62,10 +63,10 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
     cargarDatos();
   }, []);
 
-  const especialidadesFiltradas = especialidadesDb.filter(esp => 
+  const especialidadesFiltradas = especialidadesDb.filter(esp =>
     esp.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
-  
+
   const handleAbrirNuevo = () => {
     setIdEditando(null);
     setNombre('');
@@ -88,13 +89,16 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
 
     try {
       const isEdicion = idEditando !== null;
-      const url = isEdicion 
-        ? `${API_URL}/especialidades/${idEditando}` 
+      const url = isEdicion
+        ? `${API_URL}/especialidades/${idEditando}`
         : `${API_URL}/especialidades`;
-      
+
       const response = await fetch(url, {
         method: isEdicion ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': String(usuarioLogueadoId),
+        },
         body: JSON.stringify({ nombre })
       });
 
@@ -103,7 +107,7 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
         setNombre('');
         setIdEditando(null);
         setVistaLocal('lista');
-        cargarDatos(); 
+        cargarDatos();
       } else {
         const errorData = await response.json();
         mostrarToast(`Error al guardar: ${errorData.message || 'Error en el servidor'}`, "error");
@@ -115,13 +119,13 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
 
   const handleEliminarEspecialidad = async () => {
     if (!idEditando) return;
-    
+
     if (diagnosticosVinculados.length > 0) {
       mostrarToast(`No puedes eliminar "${nombre}" porque tiene ${diagnosticosVinculados.length} diagnóstico(s) vinculados.`, 'error');
       return;
     }
 
-   mostrarConfirmacion(
+    mostrarConfirmacion(
       'Eliminar Especialidad',
       `¿Seguro que deseas eliminar la especialidad "${nombre}"? Esta acción no se puede deshacer.`,
       'Sí, eliminar',
@@ -130,7 +134,10 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
       if (result.isConfirmed) {
         try {
           const response = await fetch(`${API_URL}/especialidades/${idEditando}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              'x-user-id': String(usuarioLogueadoId)
+            }
           });
           if (response.ok) {
             mostrarToast("Especialidad eliminada correctamente.", "success");
@@ -197,8 +204,8 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
                 <p style={{ textAlign: 'center', color: 'var(--gris)' }}>No se encontraron especialidades.</p>
               ) : (
                 especialidadesFiltradas.map((esp) => (
-                  <div 
-                    key={esp.id} 
+                  <div
+                    key={esp.id}
                     className="usuario-card"
                     onClick={() => handleAbrirEdicion(esp)}
                     style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
@@ -221,24 +228,24 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
             <button className="btn" onClick={() => setVistaLocal('lista')}>⬅</button>
             <h2 className="form-title">{idEditando ? 'Editar Especialidad' : 'Nueva Especialidad'}</h2>
           </div>
-          
+
           <div className="form-container">
             <div className="input-group">
               <label>Nombre de la Especialidad</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="Ej: Cardiología, Pediatría..." 
-                value={nombre} 
-                onChange={e => setNombre(e.target.value)} 
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Ej: Cardiología, Pediatría..."
+                value={nombre}
+                onChange={e => setNombre(e.target.value)}
               />
             </div>
 
-            
+
             {idEditando && (
               <div className="input-group" style={{ marginTop: '1rem' }}>
                 <label>Diagnósticos Asociados a esta Especialidad ({diagnosticosVinculados.length})</label>
-                
+
                 {diagnosticosVinculados.length === 0 ? (
                   <p style={{ fontSize: '0.9rem', color: 'var(--gris)', margin: '0.5rem 0' }}>
                     No hay diagnósticos vinculados a esta especialidad todavía.
@@ -246,21 +253,21 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
                     {diagnosticosVinculados.map((diag) => (
-                      <div 
+                      <div
                         className="usuario-card"
-                        key={diag.id} 
+                        key={diag.id}
                       >
                         <span style={{ fontWeight: '600', color: 'var(--azul-profundo)', fontSize: '0.9rem' }}>
                           {diag.titulo}
                         </span>
-                        
-                        <button 
+
+                        <button
                           className="btn"
                           type="button"
                           onClick={() => handleDesasociarDiagnostico(diag)}
                           style={{ background: 'none', border: 'none', color: 'var(--celeste)', cursor: 'pointer', padding: 0 }}
                         >
-                          Editar 
+                          Editar
                         </button>
                       </div>
                     ))}
@@ -275,11 +282,11 @@ export const GestionEspecialidades: React.FC<GestionEspecialidadesProps> = ({ on
               </button>
 
               {idEditando && (
-                <button 
+                <button
                   className="btn-eliminar"
                   type="button"
-                  onClick={handleEliminarEspecialidad} 
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}
+                  onClick={handleEliminarEspecialidad}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <TrashIcon /> Eliminar Especialidad
                 </button>

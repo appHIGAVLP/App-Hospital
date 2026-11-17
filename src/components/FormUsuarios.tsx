@@ -4,9 +4,9 @@ import { mostrarConfirmacion, mostrarToast } from './Alertas';
 
 interface FormularioUsuarioProps {
   onVolver: () => void;
-  modoEdicion?: boolean; 
-  datosIniciales?: any; 
-  usuarioActualId?: string | number;
+  modoEdicion?: boolean;
+  datosIniciales?: any;
+  usuarioActualId: string | number;
 }
 
 interface EspecialidadDb {
@@ -23,11 +23,11 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState(''); 
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   const [especialidadesSeleccionadas, setEspecialidadesSeleccionadas] = useState<EspecialidadDb[]>([]);
   const [especialidadesDb, setEspecialidadesDb] = useState<EspecialidadDb[]>([]);
 
@@ -58,30 +58,30 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
     setApellido(datosIniciales?.apellido || '');
     setUsername(datosIniciales?.username || '');
     setIsAdmin(datosIniciales?.is_admin || false);
-    
-    
+
+
     const especialidadesLimpia = (datosIniciales?.especialidades || [])
       .map((esp: any) => {
         if (esp && esp.especialidad) return esp.especialidad;
         return esp;
       })
-      .filter((e: any) => typeof e === 'object' && e !== null && e.id !== undefined); 
+      .filter((e: any) => typeof e === 'object' && e !== null && e.id !== undefined);
 
     setEspecialidadesSeleccionadas(especialidadesLimpia);
-    
+
     setPassword('');
     setConfirmPassword('');
   }, [datosIniciales]);
-  
-  const opcionesFiltradas = especialidadesDb.filter(esp => 
-    esp.nombre.toLowerCase().includes(busquedaEsp.toLowerCase()) && 
+
+  const opcionesFiltradas = especialidadesDb.filter(esp =>
+    esp.nombre.toLowerCase().includes(busquedaEsp.toLowerCase()) &&
     !especialidadesSeleccionadas.some(seleccionada => String(seleccionada.id) === String(esp.id))
   );
 
   const handleSeleccionarEspecialidad = (esp: EspecialidadDb) => {
     setEspecialidadesSeleccionadas([...especialidadesSeleccionadas, esp]);
-    setBusquedaEsp(''); 
-    setMostrarLista(false); 
+    setBusquedaEsp('');
+    setMostrarLista(false);
   };
 
   const handleQuitarEspecialidad = (idQuitar: string) => {
@@ -103,11 +103,11 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
       mostrarToast("Error: El nombre de usuario es obligatorio.", "error");
       return;
     }
-    
+
     const idsEspecialidades = especialidadesSeleccionadas
-      .filter(esp => esp && esp.id !== undefined) 
+      .filter(esp => esp && esp.id !== undefined)
       .map(esp => String(esp.id));
-    
+
     const datosUsuario: any = {
       username,
       nombre,
@@ -119,7 +119,7 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
     if (password.trim() !== '') {
       datosUsuario.password = password;
     }
-    
+
     try {
       const url = modoEdicion ? `${API_URL}/usuarios/${datosIniciales.id}` : `${API_URL}/usuarios`;
       const method = modoEdicion ? 'PATCH' : 'POST';
@@ -127,7 +127,8 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
       const response = await fetch(url, {
         method: method,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-user-id': String(usuarioActualId)
         },
         body: JSON.stringify(datosUsuario)
       });
@@ -161,7 +162,10 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
       if (result.isConfirmed) {
         try {
           const response = await fetch(`${API_URL}/usuarios/${datosIniciales.id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              'x-user-id': String(usuarioActualId)
+            }
           });
 
           if (response.ok) {
@@ -176,7 +180,7 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
       }
     });
   };
-  
+
   const TrashIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="3 6 5 6 21 6"></polyline>
@@ -189,7 +193,7 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
   return (
     <section className="protocol-form-section">
       <button className="btn" onClick={onVolver}>⬅ Cancelar y volver</button>
-      
+
       <div className="form-container">
         <h2 className="form-title">{modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
 
@@ -211,39 +215,39 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
         <div className="input-group">
           <label style={{ display: 'flex', justifyContent: 'space-between' }}>
             {modoEdicion ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setMostrarPassword(!mostrarPassword)}
               style={{ background: 'none', border: 'none', color: 'var(--celeste)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', padding: 0 }}
             >
               {mostrarPassword ? "Ocultar" : "Mostrar"}
             </button>
           </label>
-          <input 
-            type={mostrarPassword ? "text" : "password"} 
-            className="form-input" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
+          <input
+            type={mostrarPassword ? "text" : "password"}
+            className="form-input"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
           />
         </div>
 
         <div className="input-group">
           <label>Repetir Contraseña</label>
-          <input 
-            type={mostrarPassword ? "text" : "password"} 
-            className="form-input"  
-            value={confirmPassword} 
-            onChange={e => setConfirmPassword(e.target.value)} 
+          <input
+            type={mostrarPassword ? "text" : "password"}
+            className="form-input"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
           />
         </div>
 
         <div className="input-group checkbox-group">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             id="adminCheck"
             className="checkbox-input"
-            checked={isAdmin} 
-            onChange={e => setIsAdmin(e.target.checked)} 
+            checked={isAdmin}
+            onChange={e => setIsAdmin(e.target.checked)}
             disabled={esUsuarioActual}
             title={esUsuarioActual ? 'No puedes modificar tu propio permiso de administrador' : undefined}
           />
@@ -258,9 +262,9 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
 
         <div className="input-group multi-select-group" style={{ position: 'relative' }}>
           <label>Especialidades</label>
-          <input 
-            type="text" 
-            className="form-input" 
+          <input
+            type="text"
+            className="form-input"
             placeholder="Escriba para buscar especialidad..."
             value={busquedaEsp}
             onChange={e => {
@@ -268,14 +272,14 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
               setMostrarLista(true);
             }}
             onFocus={() => setMostrarLista(true)}
-            onBlur={() => setTimeout(() => setMostrarLista(false), 200)} 
+            onBlur={() => setTimeout(() => setMostrarLista(false), 200)}
           />
-          
+
           {mostrarLista && opcionesFiltradas.length > 0 && (
             <ul className="dropdown-opciones">
               {opcionesFiltradas.map(esp => (
-                <li 
-                  key={esp.id} 
+                <li
+                  key={esp.id}
                   className="dropdown-item"
                   onClick={() => handleSeleccionarEspecialidad(esp)}
                 >
@@ -284,12 +288,12 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
               ))}
             </ul>
           )}
-          
+
           <div className="tags-display">
             {especialidadesSeleccionadas.map(esp => (
               <span key={esp.id} className="tag-item">
                 {esp.nombre}
-                <button 
+                <button
                   type="button"
                   onClick={() => handleQuitarEspecialidad(esp.id)}
                   className="tag-close"
@@ -307,10 +311,10 @@ export const FormularioUsuario: React.FC<FormularioUsuarioProps> = ({
           </button>
 
           {modoEdicion && !esUsuarioActual && (
-            <button 
+            <button
               className="btn-eliminar"
               type="button"
-              onClick={handleEliminarUsuario} 
+              onClick={handleEliminarUsuario}
             >
               <TrashIcon /> Eliminar usuario
             </button>
