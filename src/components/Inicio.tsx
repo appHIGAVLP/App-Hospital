@@ -197,8 +197,8 @@ export const Inicio: React.FC<InicioProps> = ({ onNavigateToProtocols }) => {
                             resultado.usuarioEliminado
                               ? 'Tu usuario fue eliminado. La sesión se cerró.'
                               : resultado.huboCambios
-                              ? 'Datos sincronizados correctamente.'
-                              : 'Ya estás en la última versión.'
+                                ? 'Datos sincronizados correctamente.'
+                                : 'Ya estás en la última versión.'
                           );
                           setEstadoSincronizacion(
                             resultado.usuarioEliminado
@@ -244,47 +244,49 @@ export const Inicio: React.FC<InicioProps> = ({ onNavigateToProtocols }) => {
 
             {vistaActual === 'crear' && usuarioLogueado?.is_admin && (
               tipoFormulario === 'usuario' ? (
-              <GestionUsuarios 
-                onVolver={() => setVistaActual('inicio')}
-                onCrearUsuario={() => {
-                setModoEdicion(false);
-                setDatosEdicion(null);
-                setTipoFormulario('crear_usuario');
-              }} 
-              onEditarUsuario={(usuarioSeleccionado) => {
-                setModoEdicion(true);
-                setDatosEdicion(usuarioSeleccionado);
-                setTipoFormulario('crear_usuario');
-              }}
-              />
-              ) : tipoFormulario === 'crear_usuario' ? (
-                <FormularioUsuario 
-                onVolver={() => setTipoFormulario('usuario')} 
-                modoEdicion={modoEdicion}
-                datosIniciales={datosEdicion}
-                usuarioActualId={usuarioLogueado.id}
-              />
-              ) : tipoFormulario === 'especialidad' ? (
-                <GestionEspecialidades 
-                  onVolver={() => setVistaActual('inicio')} 
-                  onEditarDiagnostico={(diagnostico) => {
-                  const diagnosticoCompleto = tarjetas.find(t => String(t.id) === String(diagnostico.id));
-                  if (diagnosticoCompleto) {
-                    setTipoFormulario('diagnostico');
+                <GestionUsuarios
+                  onVolver={() => setVistaActual('inicio')}
+                  onCrearUsuario={() => {
+                    setModoEdicion(false);
+                    setDatosEdicion(null);
+                    setTipoFormulario('crear_usuario');
+                  }}
+                  onEditarUsuario={(usuarioSeleccionado) => {
                     setModoEdicion(true);
-                    setDatosEdicion(diagnosticoCompleto); 
-                    setVistaActual('crear');
+                    setDatosEdicion(usuarioSeleccionado);
+                    setTipoFormulario('crear_usuario');
+                  }}
+                />
+              ) : tipoFormulario === 'crear_usuario' ? (
+                <FormularioUsuario
+                  onVolver={() => setTipoFormulario('usuario')}
+                  modoEdicion={modoEdicion}
+                  datosIniciales={datosEdicion}
+                  usuarioActualId={usuarioLogueado.id}
+                />
+              ) : tipoFormulario === 'especialidad' ? (
+                <GestionEspecialidades
+                  usuarioLogueadoId={usuarioLogueado.id}
+                  onVolver={() => setVistaActual('inicio')}
+                  onEditarDiagnostico={(diagnostico) => {
+                    const diagnosticoCompleto = tarjetas.find(t => String(t.id) === String(diagnostico.id));
+                    if (diagnosticoCompleto) {
+                      setTipoFormulario('diagnostico');
+                      setModoEdicion(true);
+                      setDatosEdicion(diagnosticoCompleto);
+                      setVistaActual('crear');
                     } else {
                       alert("Hubo un error al buscar los detalles del diagnóstico.");
-                     }
-                    }}
-                  />
+                    }
+                  }}
+                />
               ) : (
                 <FormularioCreacion
                   tipoInicial={tipoFormulario}
                   modoEdicion={modoEdicion}
                   datosIniciales={datosEdicion}
                   onVolver={handleVolverDesdeFormulario}
+                  usuarioLogueadoId={usuarioLogueado.id}
                 />
               )
             )}
