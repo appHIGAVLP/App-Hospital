@@ -921,6 +921,28 @@ body {
   transition: all 0.2s ease;
 }
 
+.toastui-editor-popup.toastui-editor-popup-add-image {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  margin-left: 0 !important;
+  width: 92% !important;
+  max-width: 340px !important;
+  box-sizing: border-box !important;
+  z-index: 1000 !important;
+}
+
+/* Asegurar que los inputs internos no rompan el ancho */
+.toastui-editor-popup-add-image .toastui-editor-popup-body {
+  padding: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.toastui-editor-popup-add-image input[type="text"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 
 
 .lista-usuarios {
