@@ -836,24 +836,46 @@ body {
 .contenido-markdown .toastui-editor-contents table td,
 .editor-wrapper .toastui-editor-contents table th,
 .editor-wrapper .toastui-editor-contents table td {
-  border: 1px solid var(--borde-claro);
-  padding: 0.75rem;
-  text-align: left;
-  vertical-align: top;
+  border: 1px solid var(--borde-claro) !important;
+  padding: 0.75rem !important;
+  vertical-align: top !important;
+}
+
+
+.contenido-markdown .toastui-editor-contents table th:not([align]):not([style*="text-align"]),
+.contenido-markdown .toastui-editor-contents table td:not([align]):not([style*="text-align"]),
+.editor-wrapper .toastui-editor-contents table th:not([align]):not([style*="text-align"]),
+.editor-wrapper .toastui-editor-contents table td:not([align]):not([style*="text-align"]) {
+  text-align: left !important;
 }
 
 
 .contenido-markdown .toastui-editor-contents table th,
 .editor-wrapper .toastui-editor-contents table th {
-  background-color: var(--celeste-suave);
-  color: var(--azul-profundo);
-  font-weight: 700;
+  background-color: var(--celeste-suave) !important;
+  color: var(--azul-profundo) !important;
+  font-weight: 700 !important;
+}
+
+.contenido-markdown .toastui-editor-contents table th p,
+.editor-wrapper .toastui-editor-contents table th p {
+  color: var(--azul-profundo) !important;
+  font-weight: 700 !important;
 }
 
 .contenido-markdown .toastui-editor-contents table td,
 .editor-wrapper .toastui-editor-contents table td {
-  background-color: var(--blanco-puro);
-  color: var(--texto-oscuro);
+  background-color: var(--blanco-puro) !important;
+  color: var(--texto-oscuro) !important;
+}
+
+
+.contenido-markdown .toastui-editor-contents table p,
+.editor-wrapper .toastui-editor-contents table p {
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  text-align: inherit !important;
 }
 
 .contenido-markdown .toastui-editor-contents table ul,
@@ -871,12 +893,6 @@ body {
   margin: 0.15rem 0;
 }
 
-.contenido-markdown .toastui-editor-contents table p,
-.editor-wrapper .toastui-editor-contents table p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
 
 .contenido-markdown img {
   max-width: 100%;
@@ -909,30 +925,22 @@ body {
   box-shadow: 0 0 0 3px rgba(44, 86, 103, 0.15);
 }
 
-
-.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button.active {
-  background-color: var(--celeste-suave, #E2F1F6) !important;
-  color: var(--azul-profundo, #2C5667) !important;
-  border-radius: 4px 4px 0 0 !important;
-  box-shadow: inset 0 -3px 0 var(--azul-profundo) !important;
-}
-
-.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button {
-  transition: all 0.2s ease;
-}
-
-.toastui-editor-popup.toastui-editor-popup-add-image {
+.toastui-editor-defaultUI .toastui-editor-popup {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
   margin-left: 0 !important;
-  width: 92% !important;
-  max-width: 340px !important;
+  max-width: 92% !important;
   box-sizing: border-box !important;
   z-index: 1000 !important;
 }
 
-/* Asegurar que los inputs internos no rompan el ancho */
+/* El de imagen necesita ancho completo para sus inputs */
+.toastui-editor-defaultUI .toastui-editor-popup-add-image {
+  width: 92% !important;
+  max-width: 340px !important;
+}
+
 .toastui-editor-popup-add-image .toastui-editor-popup-body {
   padding: 12px !important;
   box-sizing: border-box !important;
@@ -941,6 +949,41 @@ body {
 .toastui-editor-popup-add-image input[type="text"] {
   width: 100% !important;
   box-sizing: border-box !important;
+}
+
+.toastui-editor-context-menu {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: max-content !important;
+  max-width: 92% !important;
+  z-index: 1000 !important;
+}
+
+/* Evita que las traducciones largas en español se pisen entre sí */
+.toastui-editor-context-menu .menu-item {
+  height: auto !important;
+  min-height: 32px !important;
+  line-height: 1.3 !important;
+  padding: 6px 12px !important;
+  white-space: normal !important;
+}
+
+
+.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button:not(.bold):not(.italic).active,
+.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button.btn-forzado-activo {
+  background-color: var(--celeste-suave, #E2F1F6) !important;
+  color: var(--azul-profundo, #2C5667) !important;
+  border-radius: 4px 4px 0 0 !important;
+  box-shadow: inset 0 -3px 0 var(--azul-profundo, #2C5667) !important;
+}
+
+
+.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button.bold.active:not(.btn-forzado-activo),
+.toastui-editor-defaultUI .toastui-editor-toolbar .toastui-editor-toolbar-group button.italic.active:not(.btn-forzado-activo) {
+  background-color: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
 }
 
 
