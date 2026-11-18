@@ -78,6 +78,90 @@ export const FormularioCreacion: React.FC<FormularioCreacionProps> = ({ tipoInic
       .catch((error) => console.error('Error al cargar especialidades:', error));
   }, []);
 
+  useEffect(() => {
+    const wrapper = document.querySelector<HTMLElement>('.editor-wrapper');
+    if (!wrapper) return;
+
+    const sincronizarFormato = () => {
+      setTimeout(() => {
+        const instance = editorRef.current?.getInstance() as any;
+        const state = instance?.wwEditor?.view?.state;
+        if (!state) return;
+
+        const marks = state.storedMarks !== null ? state.storedMarks : state.selection.$from.marks();
+
+        // Negrita
+        const boldBtn = wrapper.querySelector('button.bold');
+        if (boldBtn) {
+          const esNegrita = marks.some((m: any) => m.type.name === 'strong');
+          boldBtn.classList.toggle('btn-forzado-activo', esNegrita);
+        }
+
+        // Cursiva (Italic)
+        const italicBtn = wrapper.querySelector('button.italic');
+        if (italicBtn) {
+          const esCursiva = marks.some((m: any) => m.type.name === 'emph' || m.type.name === 'em');
+          italicBtn.classList.toggle('btn-forzado-activo', esCursiva);
+        }
+      }, 0);
+    };
+
+    const asegurarEspacioDespuesDeTabla = () => {
+      setTimeout(() => {
+        const instance = editorRef.current?.getInstance() as any;
+        const view = instance?.wwEditor?.view;
+        if (!view) return;
+
+        const { state } = view;
+        if (state.doc.lastChild?.type.name === 'table') {
+          const tr = state.tr.insert(
+            state.doc.content.size,
+            state.schema.nodes.paragraph.create()
+          );
+          view.dispatch(tr);
+        }
+      }, 0);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Backspace') return;
+
+      const instance = editorRef.current?.getInstance() as any;
+      const state = instance?.wwEditor?.view?.state;
+      if (!state || !state.selection.empty) return;
+
+      const { $from } = state.selection;
+      if ($from.parent.content.size !== 0) return;
+
+      for (let d = $from.depth; d > 0; d--) {
+        const nodeName = $from.node(d).type.name;
+        if (nodeName === 'bulletList' || nodeName === 'orderedList') {
+          e.preventDefault();
+          e.stopPropagation();
+          instance.exec('outdent');
+          return;
+        }
+      }
+    };
+
+    const manejarActividad = () => {
+      sincronizarFormato();
+      asegurarEspacioDespuesDeTabla();
+    };
+
+    wrapper.addEventListener('click', manejarActividad);
+    wrapper.addEventListener('keyup', manejarActividad);
+    wrapper.addEventListener('mouseup', sincronizarFormato);
+    wrapper.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      wrapper.removeEventListener('click', manejarActividad);
+      wrapper.removeEventListener('keyup', manejarActividad);
+      wrapper.removeEventListener('mouseup', sincronizarFormato);
+      wrapper.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, []);
+
   const opcionesEspecialidadesFiltradas = especialidadesDB.filter(esp =>
     esp.nombre.toLowerCase().includes(busquedaEsp.toLowerCase()) &&
     !especialidadesSeleccionadas.some(seleccionada => seleccionada.id === esp.id)
@@ -328,7 +412,7 @@ export const FormularioCreacion: React.FC<FormularioCreacionProps> = ({ tipoInic
                 toolbarItems={[
                   ['heading', 'bold', 'italic'],
                   ['hr'],
-                  ['ul', 'ol'],
+                  ['ul', 'ol', 'outdent'],
                   ['table', 'image'],
                 ]}
                 // hook para la subida de imágenes
