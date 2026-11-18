@@ -338,11 +338,15 @@ export const FormularioCreacion: React.FC<FormularioCreacionProps> = ({ tipoInic
 
                       const formData = new FormData();
                       formData.append('file', blob);
+                      const usuarioGuardado = JSON.parse(localStorage.getItem('usuario_hospital') || '{}');
 
-                      const response = await fetch(`${API_URL}/upload`, {
-                        method: 'POST',
+                       const response = await fetch(`${API_URL}/upload`, {
+                       method: 'POST',
+                       headers: {
+                        'x-user-id': String(usuarioGuardado.id || '')
+                        },
                         body: formData
-                      });
+                          });
 
                       if (!response.ok) throw new Error('Error al subir la imagen');
 
