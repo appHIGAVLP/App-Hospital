@@ -901,11 +901,26 @@ body {
   margin-top: 1rem;
 }
 
+.toastui-editor-popup-add-heading li[data-level="2"],
 .toastui-editor-popup-add-heading li[data-level="5"],
 .toastui-editor-popup-add-heading li[data-level="6"] {
   display: none !important;
 }
 
+.toastui-editor-popup-add-heading li[data-level="3"] h3,
+.toastui-editor-popup-add-heading li[data-level="4"] h4 {
+  font-size: 0 !important;
+}
+
+.toastui-editor-popup-add-heading li[data-level="3"] h3::after {
+  content: "Encabezado 2";
+  font-size: 20px !important;
+}
+
+.toastui-editor-popup-add-heading li[data-level="4"] h4::after {
+  content: "Encabezado 3";
+  font-size: 16px !important;
+}
 .toastui-editor-popup-add-heading li[data-level="paragraph"] {
   color: red !important;
 }
